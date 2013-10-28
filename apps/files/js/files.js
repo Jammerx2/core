@@ -218,7 +218,6 @@ $(document).ready(function() {
 	Files.displayEncryptionWarning();
 	Files.bindKeyboardShortcuts(document, jQuery);
 
-	FileList.postProcessList();
 	Files.setupDragAndDrop();
 
 	$('#file_action_panel').attr('activeAction', false);
@@ -722,6 +721,22 @@ function getPathForPreview(name) {
 	return path;
 }
 
+/**
+ * Generates a preview URL based on the URL space.
+ * @param urlSpec map with {x: width, y: height, file: file path}
+ * @return preview URL
+ */
+Files.generatePreviewUrl = function(urlSpec) {
+	if ( $('#isPublic').length ) {
+		// TODO: move this to files_sharing and override this method
+		urlSpec.t = $('#dirToken').val();
+		previewURL = OC.Router.generate('core_ajax_public_preview', urlSpec);
+	} else {
+		previewURL = OC.Router.generate('core_ajax_preview', urlSpec);
+	}
+	return previewURL;
+}
+
 Files.lazyLoadPreview = function(path, mime, ready, width, height, etag) {
 	// get mime icon url
 	Files.getMimeIcon(mime, function(iconURL) {
@@ -751,12 +766,7 @@ Files.lazyLoadPreview = function(path, mime, ready, width, height, etag) {
 			console.warn('Files.lazyLoadPreview(): missing etag argument');
 		}
 
-		if ( $('#isPublic').length ) {
-			urlSpec.t = $('#dirToken').val();
-			previewURL = OC.Router.generate('core_ajax_public_preview', urlSpec);
-		} else {
-			previewURL = OC.Router.generate('core_ajax_preview', urlSpec);
-		}
+		previewURL = Files.generatePreviewUrl(urlSpec);
 		previewURL = previewURL.replace('(', '%28');
 		previewURL = previewURL.replace(')', '%29');
 
