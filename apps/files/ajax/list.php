@@ -16,22 +16,10 @@ if (!\OC\Files\Filesystem::is_dir($dir . '/')) {
 	exit();
 }
 
-$doBreadcrumb = isset($_GET['breadcrumb']);
 $data = array();
 $baseUrl = OCP\Util::linkTo('files', 'index.php') . '?dir=';
 
 $permissions = \OCA\Files\Helper::getDirPermissions($dir);
-
-// Make breadcrumb
-if($doBreadcrumb) {
-	$breadcrumb = \OCA\Files\Helper::makeBreadcrumb($dir);
-
-	$breadcrumbNav = new OCP\Template('files', 'part.breadcrumb', '');
-	$breadcrumbNav->assign('breadcrumb', $breadcrumb, false);
-	$breadcrumbNav->assign('baseURL', $baseUrl);
-
-	$data['breadcrumb'] = $breadcrumbNav->fetchPage();
-}
 
 // make filelist
 $files = \OCA\Files\Helper::getFiles($dir);
