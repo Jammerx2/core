@@ -1,4 +1,6 @@
 // Override download path to files_sharing/public.php
+
+/* global OC, FileActions, FileList */
 function fileDownloadPath(dir, file) {
 	var url = $('#downloadURL').val();
 	if (url.indexOf('&path=') != -1) {
@@ -19,23 +21,34 @@ $(document).ready(function() {
 				action($('#filename').val());
 			}
 		}
-		FileActions.register('dir', 'Open', OC.PERMISSION_READ, '', function(filename) {
-			var tr = FileList.findFileEl(filename);
-			if (tr.length > 0) {
-				window.location = $(tr).find('a.name').attr('href');
-			}
-		});
-
-		// override since the format is different
-		FileList.getDownloadUrl = function(filename, dir) {
-			// we use this because we need the service and token attributes
-			var tr = FileList.findFileEl(filename);
-			if (tr.length > 0) {
-				return $(tr).find('a.name').attr('href') + '&download';
-			}
-			return null;
-		};
 	}
+
+	// override since the format is different
+	FileList.getDownloadUrl = function(filename, dir) {
+		var path = dir || FileList.getCurrentDirectory();
+		var params = {
+			service: 'files',
+			t: $('#sharingToken').val(),
+			path: path + '/' + OC.basename(filename),
+			download: null
+		};
+		return OC.filePath('', '', 'public.php') + '?' + OC.buildQueryString(params);
+	};
+
+	FileList.linkTo = function(dir) {
+		var params = {
+			service: 'files',
+			t: $('#sharingToken').val(),
+			dir: dir
+		};
+		return OC.filePath('', '', 'public.php') + '?' + OC.buildQueryString(params);
+	};
+
+	FileList.getAjaxUrl = function(action, params) {
+		params = params || {};
+		params.t = $('#sharingToken').val();
+		return OC.filePath('files_sharing', 'ajax', action + '.php') + '?' + OC.buildQueryString(params);
+	};
 
 	var file_upload_start = $('#file_upload_start');
 	file_upload_start.on('fileuploadadd', function(e, data) {

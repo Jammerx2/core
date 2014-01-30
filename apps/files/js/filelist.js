@@ -929,8 +929,6 @@ window.FileList = {
 };
 
 $(document).ready(function() {
-	var isPublic = !!$('#isPublic').val();
-
 	// handle upload events
 	var file_upload_start = $('#file_upload_start');
 
@@ -1160,30 +1158,28 @@ $(document).ready(function() {
 	}
 
 	// disable ajax/history API for public app (TODO: until it gets ported)
-	if (!isPublic) {
-		// fallback to hashchange when no history support
-		if (!window.history.pushState) {
-			$(window).on('hashchange', function() {
-				FileList.changeDirectory(parseCurrentDirFromUrl(), false);
-			});
-		}
-		window.onpopstate = function(e) {
-			var targetDir;
-			if (e.state && e.state.dir) {
-				targetDir = e.state.dir;
-			}
-			else{
-				// read from URL
-				targetDir = parseCurrentDirFromUrl();
-			}
-			if (targetDir) {
-				FileList.changeDirectory(targetDir, false);
-			}
-		};
-
-		// trigger ajax load
-		FileList.changeDirectory(parseCurrentDirFromUrl(), false, true);
+	// fallback to hashchange when no history support
+	if (!window.history.pushState) {
+		$(window).on('hashchange', function() {
+			FileList.changeDirectory(parseCurrentDirFromUrl(), false);
+		});
 	}
+	window.onpopstate = function(e) {
+		var targetDir;
+		if (e.state && e.state.dir) {
+			targetDir = e.state.dir;
+		}
+		else{
+			// read from URL
+			targetDir = parseCurrentDirFromUrl();
+		}
+		if (targetDir) {
+			FileList.changeDirectory(targetDir, false);
+		}
+	};
+
+	// trigger ajax load
+	FileList.changeDirectory(parseCurrentDirFromUrl(), false, true);
 
 	FileList.createFileSummary();
 });
